@@ -1,0 +1,1 @@
+[![Build Status](https://dev.azure.com/vimalverma007/Terraform-Ci-Cd/_apis/build/status%2Fvimalvermaniit.Terraform-Ci-Cd?branchName=main)](https://dev.azure.com/vimalverma007/Terraform-Ci-Cd/_build/latest?definitionId=3&branchName=main)
