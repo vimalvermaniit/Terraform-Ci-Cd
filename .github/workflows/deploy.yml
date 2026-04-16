@@ -3,7 +3,7 @@ name: Deploy Azure VM
 on:
   push:
     branches:
-      - main
+      - bicep-vm-cicd
   workflow_dispatch:
 
 jobs:
