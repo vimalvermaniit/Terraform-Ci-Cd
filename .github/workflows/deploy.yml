@@ -20,7 +20,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Create Resource Group
-      run: az group create --name RG-Test-VimalNeo --location southindia
+      run: az group create --name RG-Test-VimalNeo --location eastus
 
     - name: Deploy Bicep template
       uses: azure/arm-deploy@v1

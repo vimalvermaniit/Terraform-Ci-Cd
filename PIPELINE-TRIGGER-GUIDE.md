@@ -31,7 +31,7 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Create Resource Group
-      run: az group create --name RG-Test-VimalNeo --location southindia
+      run: az group create --name RG-Test-VimalNeo --location eastus
 
     - name: Deploy Bicep template
       uses: azure/arm-deploy@v1
@@ -48,7 +48,7 @@ jobs:
 - **Trigger Events**: Push to `bicep-vm-cicd` branch or manual dispatch
 - **Authentication**: Uses Azure service principal stored in GitHub secrets
 - **Resources Created**:
-  - Resource Group: `RG-Test-VimalNeo` (southindia)
+  - Resource Group: `RG-Test-VimalNeo` (eastus)
   - Virtual Machine: Ubuntu 22.04 LTS
   - Virtual Network with subnet
   - Public IP address
@@ -129,7 +129,7 @@ The pipeline executes in this sequence:
    - Verify credentials
 
 3. **Resource Group Creation** (30 seconds)
-   - Create `RG-Test-VimalNeo` in `southindia`
+   - Create `RG-Test-VimalNeo` in `eastus`
    - Verify creation
 
 4. **Bicep Deployment** (4-6 minutes)
