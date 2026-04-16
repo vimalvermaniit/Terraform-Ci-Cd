@@ -16,6 +16,15 @@ on:
     branches:
       - bicep-vm-cicd  # Triggers on pushes to this branch
   workflow_dispatch:  # Allows manual triggering
+    inputs:
+      osType:
+        description: 'Choose VM operating system'
+        required: true
+        default: 'Linux'
+        type: choice
+        options:
+          - Linux
+          - Windows
 
 jobs:
   deploy:
@@ -93,6 +102,7 @@ jobs:
 4. **Trigger manually**:
    - Click the "Run workflow" button (dropdown on the right)
    - Select branch: `bicep-vm-cicd`
+   - Choose `osType`: `Linux` or `Windows`
    - Click "Run workflow"
 
 5. **Pipeline starts immediately**
