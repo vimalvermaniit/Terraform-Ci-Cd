@@ -5,6 +5,15 @@ on:
     branches:
       - bicep-vm-cicd
   workflow_dispatch:
+    inputs:
+      osType:
+        description: 'Choose VM operating system'
+        required: true
+        default: 'Linux'
+        type: choice
+        options:
+          - Linux
+          - Windows
 
 jobs:
   deploy:
@@ -25,10 +34,9 @@ jobs:
       run: az group create --name RG-Test-VimalNeo --location eastus
 
     - name: Deploy Bicep template
-      uses: azure/arm-deploy@v1
-      with:
-        subscriptionId: bfcf4987-6623-4e35-b4bc-b75dbfb422ae
-        resourceGroupName: RG-Test-VimalNeo
-        template: ./main.bicep
-        parameters: ./main.parameters.json
-        deploymentMode: Incremental
+      run: |
+        az deployment group create \
+          --resource-group RG-Test-VimalNeo \
+          --template-file ./main.bicep \
+          --parameters ./main.parameters.json \
+          --parameters osType=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.osType || 'Linux' }}

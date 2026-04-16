@@ -2,7 +2,17 @@ param vmName string = 'Neo-VM'
 param adminUsername string = 'azureuser'
 @secure()
 param adminPassword string
+@allowed([
+  'Linux'
+  'Windows'
+])
+param osType string = 'Linux'
 param location string = resourceGroup().location
+
+var imagePublisher = osType == 'Windows' ? 'MicrosoftWindowsServer' : 'Canonical'
+var imageOffer = osType == 'Windows' ? 'WindowsServer' : '0001-com-ubuntu-server-jammy'
+var imageSku = osType == 'Windows' ? '2019-Datacenter' : '22_04-lts'
+var imageVersion = 'latest'
 
 resource vm 'Microsoft.Compute/virtualMachines@2023-09-01' = {
   name: vmName
@@ -18,10 +28,10 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-09-01' = {
     }
     storageProfile: {
       imageReference: {
-        publisher: 'Canonical'
-        offer: '0001-com-ubuntu-server-jammy'
-        sku: '22_04-lts'
-        version: 'latest'
+        publisher: imagePublisher
+        offer: imageOffer
+        sku: imageSku
+        version: imageVersion
       }
       osDisk: {
         createOption: 'FromImage'

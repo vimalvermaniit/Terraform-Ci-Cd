@@ -34,14 +34,15 @@ jobs:
       run: az group create --name RG-Test-VimalNeo --location eastus
 
     - name: Deploy Bicep template
-      uses: azure/arm-deploy@v1
-      with:
-        subscriptionId: bfcf4987-6623-4e35-b4bc-b75dbfb422ae
-        resourceGroupName: RG-Test-VimalNeo
-        template: ./main.bicep
-        parameters: ./main.parameters.json
-        deploymentMode: Incremental
+      run: |
+        az deployment group create \
+          --resource-group RG-Test-VimalNeo \
+          --template-file ./main.bicep \
+          --parameters ./main.parameters.json \
+          --parameters osType=${{ github.event_name == 'workflow_dispatch' && github.event.inputs.osType || 'Linux' }}
 ```
+
+> When run manually, the workflow prompts for `osType` and lets you choose `Linux` or `Windows`.
 
 ### Key Components
 
@@ -49,7 +50,7 @@ jobs:
 - **Authentication**: Uses Azure service principal stored in GitHub secrets
 - **Resources Created**:
   - Resource Group: `RG-Test-VimalNeo` (eastus)
-  - Virtual Machine: Ubuntu 22.04 LTS
+  - Virtual Machine: Linux or Windows (selected at runtime)
   - Virtual Network with subnet
   - Public IP address
   - Network Interface Card
