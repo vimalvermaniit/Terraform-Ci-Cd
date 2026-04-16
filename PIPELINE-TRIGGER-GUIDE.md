@@ -26,7 +26,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Login to Azure
-      uses: azure/login@v2
+      uses: azure/login@v3
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
@@ -232,6 +232,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: production  # Requires approval
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true  # Force Node.js 24 for compatibility
 ```
 
 ### Adding Notifications
