@@ -46,3 +46,4 @@ To connect: `ssh azureuser@<public-ip>`
 Edit `main.parameters.json` to change VM name, admin credentials, etc.
 
 Note: In production, use Key Vault for secrets instead of hardcoded passwords.# Pipeline test
+# Auto-triggered deployment
