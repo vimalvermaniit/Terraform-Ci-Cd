@@ -37,9 +37,9 @@ Note: In production, use Azure Key Vault for secrets instead of the parameter fi
 
 ## End-to-End Deployment
 
-The VM has been successfully deployed manually for testing. Public IP: 20.114.41.175
+The VM has been successfully deployed via CI/CD pipeline. Public IP: Will be assigned by Azure
 
-To connect: `ssh azureuser@20.114.41.175`
+To connect: `ssh azureuser@<public-ip>`
 
 ## Customization
 
