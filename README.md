@@ -48,3 +48,4 @@ Edit `main.parameters.json` to change VM name, admin credentials, etc.
 Note: In production, use Key Vault for secrets instead of hardcoded passwords.# Pipeline test
 # Auto-triggered deployment
 Auto-trigger pipeline test: Thu Apr 16 15:23:09 IST 2026
+Auto-trigger pipeline test1: Thu Apr 16 15:41:27 IST 2026
