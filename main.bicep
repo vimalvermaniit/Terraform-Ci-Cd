@@ -19,8 +19,8 @@ resource vm 'Microsoft.Compute/virtualMachines@2023-09-01' = {
     storageProfile: {
       imageReference: {
         publisher: 'Canonical'
-        offer: 'Ubuntu2204'
-        sku: '22_04-lts-gen2'
+        offer: 'UbuntuServer'
+        sku: '22_04-lts'
         version: 'latest'
       }
       osDisk: {

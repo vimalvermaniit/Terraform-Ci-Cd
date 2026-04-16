@@ -5,7 +5,7 @@
     "_generator": {
       "name": "bicep",
       "version": "0.39.26.7824",
-      "templateHash": "423453422255191958"
+      "templateHash": "9586101899575699725"
     }
   },
   "parameters": {
@@ -43,8 +43,8 @@
         "storageProfile": {
           "imageReference": {
             "publisher": "Canonical",
-            "offer": "Ubuntu2204",
-            "sku": "22_04-lts-gen2",
+            "offer": "UbuntuServer",
+            "sku": "22_04-lts",
             "version": "latest"
           },
           "osDisk": {
