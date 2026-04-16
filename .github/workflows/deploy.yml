@@ -20,13 +20,13 @@ jobs:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
     - name: Create Resource Group
-      run: az group create --name myResourceGroupWest --location westus2
+      run: az group create --name RG-Test-VimalNeo --location southindia
 
     - name: Deploy Bicep template
       uses: azure/arm-deploy@v1
       with:
         subscriptionId: bfcf4987-6623-4e35-b4bc-b75dbfb422ae
-        resourceGroupName: myResourceGroupWest
+        resourceGroupName: RG-Test-VimalNeo
         template: ./main.bicep
         parameters: ./main.parameters.json
         deploymentMode: Incremental
