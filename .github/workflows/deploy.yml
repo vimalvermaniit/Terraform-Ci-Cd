@@ -1,0 +1,32 @@
+name: Deploy Azure VM
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Login to Azure
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Create Resource Group
+      run: az group create --name myResourceGroupWest --location westus2
+
+    - name: Deploy Bicep template
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: bfcf4987-6623-4e35-b4bc-b75dbfb422ae
+        resourceGroupName: myResourceGroupWest
+        template: ./main.bicep
+        parameters: ./main.parameters.json
+        deploymentMode: Incremental
