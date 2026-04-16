@@ -77,18 +77,13 @@ resource vnet 'Microsoft.Network/virtualNetworks@2024-01-01' = {
         '10.0.0.0/16'
       ]
     }
-    subnets: [
-      {
-        name: 'default'
-        properties: {
-          addressPrefix: '10.0.0.0/24'
-        }
-      }
-    ]
   }
 }
 
 resource subnet 'Microsoft.Network/virtualNetworks/subnets@2024-01-01' = {
   parent: vnet
   name: 'default'
+  properties: {
+    addressPrefix: '10.0.0.0/24'
+  }
 }
