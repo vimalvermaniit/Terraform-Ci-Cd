@@ -1,0 +1,10 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "git pull": true,
+        "git push": true,
+        "git rm": true,
+        "true": true,
+        "git checkout": true,
+        "git rebase": true
+    }
+}
