@@ -32,7 +32,7 @@ spec:
           imagePullPolicy: Always
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 8080
               protocol: TCP
           resources:
             requests:
@@ -69,7 +69,7 @@ spec:
             - name: NODE_ENV
               value: "production"
             - name: PORT
-              value: "80"
+              value: "8080"
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
