@@ -1,0 +1,119 @@
+name: CI/CD to AKS
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  ACR_NAME: acr77225
+  ACR_REGISTRY: acr77225.azurecr.io
+  IMAGE_NAME: webapp
+  AKS_RESOURCE_GROUP: ${{ secrets.AKS_RESOURCE_GROUP }}
+  AKS_CLUSTER_NAME: ${{ secrets.AKS_CLUSTER_NAME }}
+  K8S_NAMESPACE: production
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Get AKS credentials
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ env.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ env.AKS_CLUSTER_NAME }}
+          admin: 'false'
+
+      - name: Login to Azure Container Registry
+        run: |
+          az acr login --name ${{ env.ACR_NAME }}
+
+      - name: Build and push Docker image to ACR
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+            ${{ env.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create Kubernetes namespace if not exists
+        run: |
+          kubectl create namespace ${{ env.K8S_NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+
+      - name: Update deployment with new image
+        run: |
+          kubectl set image deployment/webapp-deployment \
+            webapp=${{ env.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -n ${{ env.K8S_NAMESPACE }}
+
+      - name: Wait for rollout to complete
+        run: |
+          kubectl rollout status deployment/webapp-deployment \
+            -n ${{ env.K8S_NAMESPACE }} \
+            --timeout=5m
+
+      - name: Get service external IP
+        run: |
+          echo "Waiting for LoadBalancer public IP..."
+          kubectl get service webapp-service -n ${{ env.K8S_NAMESPACE }} -w &
+          WAIT_PID=$!
+          sleep 30
+          kill $WAIT_PID 2>/dev/null || true
+          
+          EXTERNAL_IP=$(kubectl get service webapp-service -n ${{ env.K8S_NAMESPACE }} \
+            -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "pending")
+          
+          if [ "$EXTERNAL_IP" != "pending" ] && [ -n "$EXTERNAL_IP" ]; then
+            echo "✅ Service is accessible at: http://$EXTERNAL_IP"
+            echo "EXTERNAL_IP=$EXTERNAL_IP" >> $GITHUB_OUTPUT
+          else
+            echo "⏳ LoadBalancer IP is still pending. It may take a few minutes."
+            echo "Check status with: kubectl get svc webapp-service -n ${{ env.K8S_NAMESPACE }}"
+          fi
+
+      - name: Verify deployment
+        run: |
+          echo "Deployment Status:"
+          kubectl get deployment webapp-deployment -n ${{ env.K8S_NAMESPACE }}
+          echo ""
+          echo "Pods Status:"
+          kubectl get pods -n ${{ env.K8S_NAMESPACE }}
+          echo ""
+          echo "Service Status:"
+          kubectl get service webapp-service -n ${{ env.K8S_NAMESPACE }}
+
+      - name: Deployment Summary
+        run: |
+          echo "=== CI/CD Pipeline Completed Successfully ==="
+          echo "Image: ${{ env.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}"
+          echo "Cluster: ${{ env.AKS_CLUSTER_NAME }}"
+          echo "Namespace: ${{ env.K8S_NAMESPACE }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "=============================================="

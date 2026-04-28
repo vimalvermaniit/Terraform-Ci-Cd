@@ -1,0 +1,21 @@
+{
+  "name": "aks-webapp",
+  "version": "1.0.0",
+  "description": "Simple web app deployed to Azure Kubernetes Service via GitHub Actions CI/CD",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "aks",
+    "kubernetes",
+    "github-actions",
+    "azure"
+  ],
+  "author": "Azure Cloud Architect",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
