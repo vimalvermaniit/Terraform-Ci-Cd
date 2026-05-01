@@ -27,6 +27,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
@@ -35,6 +37,11 @@ jobs:
         uses: azure/login@v3
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Verify Azure login
+        run: |
+          az account show
+          az account list --all --output table
 
       - name: Get AKS credentials
         uses: azure/aks-set-context@v5
@@ -73,11 +80,32 @@ jobs:
             webapp=${{ env.ACR_REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
             -n ${{ env.K8S_NAMESPACE }}
 
+      - name: Check pod status before rollout
+        run: |
+          echo "Checking pods in namespace ${{ env.K8S_NAMESPACE }}..."
+          kubectl get pods -n ${{ env.K8S_NAMESPACE }} -o wide
+          echo ""
+          echo "Deployment status:"
+          kubectl get deployment webapp-deployment -n ${{ env.K8S_NAMESPACE }}
+
       - name: Wait for rollout to complete
         run: |
           kubectl rollout status deployment/webapp-deployment \
             -n ${{ env.K8S_NAMESPACE }} \
-            --timeout=5m
+            --timeout=10m
+
+      - name: Debug pod logs if rollout fails
+        if: failure()
+        run: |
+          echo "=== Pod Details ==="
+          kubectl describe pods -n ${{ env.K8S_NAMESPACE }}
+          echo ""
+          echo "=== Pod Logs ==="
+          for pod in $(kubectl get pods -n ${{ env.K8S_NAMESPACE }} -o name); do
+            echo "Logs from $pod:"
+            kubectl logs $pod -n ${{ env.K8S_NAMESPACE }} --all-containers=true --tail=50 || true
+            echo ""
+          done
 
       - name: Get service external IP
         run: |
