@@ -69,6 +69,26 @@ jobs:
         run: |
           kubectl create namespace ${{ env.K8S_NAMESPACE }} --dry-run=client -o yaml | kubectl apply -f -
 
+      - name: Create ACR pull secret and service account
+        run: |
+          # Get ACR credentials using service principal
+          ACR_USERNAME=$(az acr credential show --name ${{ env.ACR_NAME }} --query username -o tsv)
+          ACR_PASSWORD=$(az acr credential show --name ${{ env.ACR_NAME }} --query passwords[0].value -o tsv)
+          
+          # Create imagePullSecret for ACR
+          kubectl create secret docker-registry acr-secret \
+            --docker-server=${{ env.ACR_REGISTRY }} \
+            --docker-username=$ACR_USERNAME \
+            --docker-password=$ACR_PASSWORD \
+            --docker-email=noreply@github.com \
+            -n ${{ env.K8S_NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+          
+          # Create service account
+          kubectl create serviceaccount webapp-sa \
+            -n ${{ env.K8S_NAMESPACE }} \
+            --dry-run=client -o yaml | kubectl apply -f -
+
       - name: Apply Kubernetes manifests
         run: |
           kubectl apply -f k8s/deployment.yaml

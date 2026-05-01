@@ -9,6 +9,7 @@ metadata:
     version: v1
 spec:
   replicas: 2
+  progressDeadlineSeconds: 600
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -25,6 +26,9 @@ spec:
       annotations:
         prometheus.io/scrape: "false"
     spec:
+      serviceAccountName: webapp-sa
+      imagePullSecrets:
+        - name: acr-secret
       terminationGracePeriodSeconds: 30
       containers:
         - name: webapp
@@ -41,26 +45,24 @@ spec:
             limits:
               cpu: 500m
               memory: 512Mi
-          readinessProbe:
-            httpGet:
-              path: /health
-              port: http
-              scheme: HTTP
-            initialDelaySeconds: 5
-            periodSeconds: 10
-            timeoutSeconds: 3
-            successThreshold: 1
-            failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /health
               port: http
               scheme: HTTP
-            initialDelaySeconds: 15
-            periodSeconds: 20
-            timeoutSeconds: 3
-            successThreshold: 1
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 5
             failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
           lifecycle:
             preStop:
               exec:
@@ -84,6 +86,15 @@ spec:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
             - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - webapp
+                topologyKey: kubernetes.io/hostname
+
               podAffinityTerm:
                 labelSelector:
                   matchExpressions:
