@@ -148,7 +148,7 @@ After deployment completes:
 
 1. **Check Pod Status**:
    ```bash
-   az aks get-credentials -g aks-rg -n aks-cluster
+   az aks get-credentials -g RG-AKS-EUS-Vimal -n aks-cluster
    kubectl get pods -n production
    ```
 
